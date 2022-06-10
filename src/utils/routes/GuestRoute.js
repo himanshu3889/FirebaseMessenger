@@ -1,8 +1,14 @@
-import React from 'react'
-import {Navigate} from 'react-router-dom'
+import { useContext } from "react";
+import { Navigate } from "react-router-dom";
+import AppContext from "../../store/AppContext";
+
 
 export default function GuestRoute({ component }) {
-  console.log("Inside auth route");
-  return <Navigate to="/" />;
-  // return component;
+  const [isLoggedIn] = useContext(AppContext);
+
+  console.log("Inside guest route");
+  if (isLoggedIn) {
+    return <Navigate to="/" />;
+  }
+  return component;
 }
