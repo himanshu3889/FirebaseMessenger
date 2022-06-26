@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-// import "./assets/css/style.css";
+import "./assets/css/style.css";
 import Loading from "./components/Loading";
 import NotFound from "./pages/404";
 import { Routes, Route, useLocation } from "react-router-dom";
