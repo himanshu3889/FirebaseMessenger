@@ -1,28 +1,38 @@
 import React from "react";
-import Gallery from "../../pages/Gallery";
+import ForgotPassword from "../../pages/ForgotPassword";
 import Home from "../../pages/Home";
 import Login from "../../pages/Login";
+import Profile from "../../pages/Profile";
 import Signup from "../../pages/Signup";
-export default [
+
+const routes = [
   {
     path: "/",
     exact: true,
     element: <Home />,
-    protected: null,
+    protected: "auth",
   },
   {
-    path: "/gallery",
-    element: <Gallery />,
-    protected: 'auth',
+    path: "/profile",
+    element: <Profile />,
+    protected: "auth",
   },
+
   {
     path: "/login",
     element: <Login />,
-    protected: 'guest',
+    protected: "guest",
   },
   {
     path: "/signup",
     element: <Signup />,
-    protected: 'guest',
+    protected: "guest",
+  },
+  {
+    path: "/resetPassword",
+    element: <ForgotPassword />,
+    protected: "guest",
   },
 ];
+
+export default routes;

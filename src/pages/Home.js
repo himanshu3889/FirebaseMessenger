@@ -1,10 +1,169 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  addDoc,
+  Timestamp,
+  orderBy,
+  setDoc,
+  doc,
+  getDoc,
+  updateDoc,
+} from "firebase/firestore";
+import { auth, firebaseDb } from "../configs/firebase";
+import SearchUser from "../components/SearchUser";
+import User from "../components/Users";
+import Messages from "../components/Messages";
+import MessageForm from "../components/MessageForm";
+import PrimaryUserHeader from "../components/PrimaryUserHeader";
+import SecondaryUseHeader from "../components/SecondaryUseHeader";
+import { Encrypt } from "../utils/Encryption/aes";
 
 export default function Home() {
+  const [primaryUser, setPrimaryUser] = useState("");
+  const [friendUsersUid, setFriendUsersUid] = useState([]);
+  const [friendUsers, setFriendUsers] = useState([]);
+  const [secondaryUser, setSecondaryUser] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [messageText, setMessageText] = useState("");
+
+  const primaryUserId = auth.currentUser.uid;
+
+  useEffect(() => {
+    getDoc(doc(firebaseDb, "users", primaryUserId)).then((docSnap) => {
+      if (docSnap.exists) {
+        setPrimaryUser(docSnap.data());
+      }
+    });
+
+    // listen to the users/primaryUserUid document i.e take uid of friend users
+    const primaryUserRef = doc(firebaseDb, "users", primaryUserId);
+    const unsub = onSnapshot(primaryUserRef, (doc) => {
+      let friendUsersUid = [];
+      doc.data().friends.forEach((uid) => {
+        friendUsersUid.push(uid);
+      });
+      setFriendUsersUid(friendUsersUid);
+
+      // listen to multiple users uid documents in users collection i.e take friend users details from uid
+      const usersRef = collection(firebaseDb, "users");
+      const usersUidQuery = query(usersRef, where("uid", "in", friendUsersUid));
+      onSnapshot(usersUidQuery, (querySnapshot) => {
+        let users = [];
+        querySnapshot.forEach((doc) => {
+          users.push(doc.data());
+        });
+        setFriendUsers(users);
+      });
+    });
+    return () => unsub();
+  }, []);
+
+  //  Select the User
+  const selectUser = async (user) => {
+    setSecondaryUser(user);
+    const secondaryUserId = user.uid;
+    const id =
+      primaryUserId > secondaryUserId
+        ? `${primaryUserId + secondaryUserId}`
+        : `${secondaryUserId + primaryUserId}`;
+    const msgsRef = collection(firebaseDb, "messages", id, "chat");
+    const messagesQuery = query(msgsRef, orderBy("createdAt", "asc"));
+    onSnapshot(messagesQuery, (querySnapshot) => {
+      let messages = [];
+      querySnapshot.forEach((doc) => {
+        messages.push(doc.data());
+      });
+      setMessages(messages);
+    });
+    // get last message b/w logged in user and selected user
+    const docSnap = await getDoc(doc(firebaseDb, "lastMessage", id));
+    if (docSnap.data() && docSnap.data().from !== primaryUserId) {
+      // update last message doc, set unread to false
+      await updateDoc(doc(firebaseDb, "lastMessage", id), { unread: false });
+    }
+  };
+
+  const handleMessageSubmit = async (e) => {
+    e.preventDefault();
+    if (messageText === "") return;
+    const secondaryUserId = secondaryUser.uid;
+    const id =
+      primaryUserId > secondaryUserId
+        ? `${primaryUserId + secondaryUserId}`
+        : `${secondaryUserId + primaryUserId}`;
+
+    await addDoc(collection(firebaseDb, "messages", id, "chat"), {
+      messageText: Encrypt(messageText),
+      from: primaryUserId,
+      to: secondaryUserId,
+      createdAt: Timestamp.fromDate(new Date()),
+    });
+    await setDoc(doc(firebaseDb, "lastMessage", id), {
+      messageText: Encrypt(messageText),
+      from: primaryUserId,
+      to: secondaryUserId,
+      createdAt: Timestamp.fromDate(new Date()),
+      unread: true,
+    });
+    setMessageText("");
+  };
+
   return (
-    <div>
-      <p>Welcome Home Himanshu </p>
-      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Illo a sequi repudiandae, possimus sint delectus culpa recusandae. Minus, nulla vero ex labore deleniti cumque sapiente, esse nemo fugit facere pariatur voluptatum accusantium? Fugiat cum impedit provident quod atque libero. Non, amet corporis. Vitae impedit facilis sint culpa error dolorum dolorem? Dolore quo vitae, rem deleniti maxime consequatur dolores? Nihil blanditiis veniam nisi placeat ab corporis debitis architecto suscipit tenetur molestiae vitae, officiis laudantium dolorum eligendi inventore doloribus sunt consequatur iste ipsum. Quae harum accusamus obcaecati nulla ratione, soluta molestias. Iure ducimus nostrum odio sapiente et consequatur natus nesciunt unde, dolorem praesentium voluptatum ipsa quia est architecto iusto quaerat rem placeat tempora! Quam dolores minima perspiciatis soluta tenetur assumenda obcaecati aspernatur, dolorem necessitatibus sapiente labore. Aliquam reiciendis nobis non amet ex, nesciunt ad nihil alias assumenda soluta temporibus porro sit accusantium consectetur, neque obcaecati ratione quam quaerat officia sint? Dolorem repellat amet officiis numquam, perferendis tempore in iusto itaque consequatur pariatur repudiandae aut ratione dolores aliquid aspernatur atque nostrum temporibus ipsam! Eveniet accusantium, dignissimos sint aliquam consequatur velit error fugiat cum facere, unde eligendi quisquam odio obcaecati aliquid quam doloremque voluptas cumque non modi nostrum ab quis. Culpa mollitia quisquam ut vero autem quibusdam earum, eveniet numquam eaque labore hic, sequi corporis quo placeat atque quas? Totam nemo soluta deleniti! Earum mollitia tenetur nobis, quisquam minima officiis, quas saepe cum distinctio vitae nihil non fugiat accusamus nisi nesciunt deserunt, impedit incidunt perspiciatis delectus? Ullam necessitatibus id a fuga incidunt? Nihil sit quae nemo dicta! Laudantium at aperiam cumque, sunt accusamus voluptatum facere, vitae corporis iste beatae minima est, obcaecati modi ea. Corporis inventore fuga distinctio, recusandae, eaque debitis cumque fugiat natus voluptatibus nam minus quam molestiae ratione praesentium voluptatum sunt ex reprehenderit, dolor similique excepturi iusto quas aliquam. Natus saepe incidunt praesentium obcaecati consectetur quaerat deleniti sapiente labore minima doloremque, nemo facere ipsam voluptatibus rerum in. Unde quasi officia exercitationem ab possimus, voluptates sint quam vel earum tempora quidem dignissimos distinctio natus illo aliquid veritatis tenetur obcaecati quia ut amet, placeat nesciunt esse et! Excepturi ipsa nostrum fugiat labore laboriosam laborum necessitatibus voluptatum repellat quisquam facere. Officiis ducimus ea nisi natus corporis magni perferendis, tempore quibusdam laborum error consequatur minima maxime iure nulla, culpa vero assumenda alias nobis reiciendis voluptatum inventore sunt! Incidunt molestias repudiandae, vel quaerat excepturi, consequatur soluta optio suscipit cum vero, repellendus non magnam id officiis quae quam. Cupiditate praesentium accusantium consequuntur fugit eveniet ipsum voluptatum ipsam possimus ullam blanditiis ratione obcaecati voluptatibus non, quaerat dolore quisquam. Natus beatae placeat amet itaque eligendi quae culpa aspernatur id doloremque cupiditate enim odit vel iusto quasi dolor debitis provident pariatur nesciunt, ab corporis rerum totam necessitatibus omnis dolores. Ratione impedit obcaecati dicta dignissimos ullam itaque doloribus porro dolorum, natus ducimus in numquam quo, autem commodi voluptate a eum, laborum mollitia culpa sed magnam rerum placeat optio iusto! Distinctio blanditiis quibusdam labore necessitatibus quaerat quo assumenda soluta eligendi, omnis tempora optio dolorum? Nulla quia nam, earum possimus odio quidem quas! Quia.</p>
+    <div className="h-screen sticky top-0">
+      <div className="flex border border-grey rounded shadow-lg h-full">
+        {/* <!-- Left --> */}
+        <div className="w-1/3 border flex flex-col">
+          {/* <!-- Primary User Header --> */}
+          <PrimaryUserHeader primaryUser={primaryUser} />
+
+          {/* <!-- Search --> */}
+          <SearchUser primaryUserId={primaryUserId} selectUser={selectUser} />
+          {/* <!-- Friends --> */}
+          <div className="bg-white flex-1 overflow-auto divide-y ">
+            {friendUsers.map((user) => (
+              <User
+                key={user.uid}
+                secondaryUser={user}
+                selectUser={selectUser}
+                primaryUserId={primaryUserId}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* <!-- Right --> */}
+        <div className="w-2/3 border flex flex-col">
+          {/* <!-- Seondary User Header --> */}
+          <SecondaryUseHeader secondaryUser={secondaryUser} />
+          {/* <!-- Messages --> */}
+          <div
+            className="flex-1 overflow-auto"
+            style={{ backgroundColor: "#DAD3CC" }}
+          >
+            {messages.length
+              ? messages.map((message, idx) => (
+                  <Messages
+                    key={idx}
+                    message={message}
+                    primaryUserId={primaryUserId}
+                  />
+                ))
+              : null}
+          </div>
+
+          {/* <!-- Message Input --> */}
+          {secondaryUser && (
+            <MessageForm
+              handleSubmit={handleMessageSubmit}
+              messageText={messageText}
+              setMessageText={setMessageText}
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 }
