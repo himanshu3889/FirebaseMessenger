@@ -25,8 +25,8 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="h-screen flex ">
-      <div className="flex w-1/2 bg-gradient-to-tr from-blue-800 to-purple-700 i justify-around items-center">
+    <div className="h-screen flex justify-center items-center ">
+      <div className="hidden md:flex md:visible w-1/2 h-screen bg-gradient-to-tr from-blue-800 to-purple-700 i justify-around items-center">
         <div>
           <h1 className="text-white font-bold text-4xl font-sans">
             Firebase Messenger
@@ -34,7 +34,7 @@ export default function ForgotPassword() {
           <p className="text-white mt-1">A Encrypted chat app using firebase</p>
         </div>
       </div>
-      <div className="flex w-1/2 justify-center items-center bg-white">
+      <div className="flex w-1/2 h-screen justify-center items-center bg-white">
         <Formik
           className="bg-white"
           initialValues={{ email: "" }}

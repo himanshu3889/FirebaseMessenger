@@ -5,8 +5,8 @@ import { firebaseDb } from "../configs/firebase";
 import defaultAvatar from "../Images/defaultAvatar.png";
 import { Decrypt } from "../utils/Encryption/aes";
 
-export default function User({ primaryUserId, secondaryUser, selectUser }) {
-  const secondaryUserId = secondaryUser?.uid;
+export default function User({ primaryUserId, user, selectUser }) {
+  const secondaryUserId = user?.uid;
   const [lastMessage, setLastMessage] = useState("");
 
   useEffect(() => {
@@ -22,43 +22,41 @@ export default function User({ primaryUserId, secondaryUser, selectUser }) {
 
   return (
     <div
-      className="my-0.5 px-3 flex items-center border border-black bg-gray-100 cursor-pointer hover:bg-sky-300 active:bg-sky-500"
-      onClick={() => selectUser(secondaryUser)}
+      className="flex justify-between items-center bg-white mt-2 mx-1 p-2 hover:shadow-lg rounded cursor-pointer transition"
+      onClick={() => selectUser(user)}
     >
-      <div>
+      <div className="flex ml-2">
         <img
-          className="h-12 w-12 rounded-full shrink-0"
-          src={secondaryUser?.avatar || defaultAvatar}
+          src={user?.avatar || defaultAvatar}
           alt="avatar"
+          width="40"
+          height="40"
+          className="rounded-full hidden md:flex md:visible"
         />
-      </div>
-      <div className="ml-4 flex-1 py-1">
-        <div className="flex items-bottom justify-between">
-          <p className="text-grey-darkest font-semibold">
-            {secondaryUser?.name}
-          </p>
+        <div className="flex flex-col ml-2">
+          <span className="font-medium text-black">{user?.name}</span>
           {lastMessage && (
-            <div className="flex">
-              {lastMessage?.from === secondaryUserId && lastMessage?.unread && (
-                <i className="fa-solid fa-envelope fa-bounce text-lg mx-1 text-green-500"></i>
-              )}
-              <p className="text-xs mx-1 text-grey-darkest">
-                <Moment fromNow ago>
-                  {lastMessage?.createdAt?.toDate()}
-                </Moment>
-              </p>
-            </div>
+            <span className="text-sm text-gray-500 truncate w-32">
+              <span className="font-semibold text-gray-600 ">
+                {lastMessage?.from === primaryUserId ? "Me : " : null}{" "}
+              </span>
+              {Decrypt(lastMessage?.messageText)}
+            </span>
           )}
         </div>
-        {lastMessage && (
-          <p className="text-grey-dark mt-0.5 text-sm truncate">
-            <span className="font-semibold ">
-              {lastMessage?.from === primaryUserId ? "Me : " : null}
-            </span>
-            {Decrypt(lastMessage?.messageText)}
-          </p>
-        )}
       </div>
+      {lastMessage && (
+        <div className="flex flex-col items-center">
+          {lastMessage?.from === secondaryUserId && lastMessage?.unread && (
+            <i className="fa-solid fa-envelope fa-bounce text-lg mx-1 text-green-500"></i>
+          )}
+          <span className="text-gray-400 text-sm">
+            <Moment fromNow ago>
+              {lastMessage?.createdAt?.toDate()}
+            </Moment>
+          </span>
+        </div>
+      )}
     </div>
   );
 }

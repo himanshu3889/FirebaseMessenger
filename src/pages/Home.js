@@ -122,11 +122,11 @@ export default function Home() {
           {/* <!-- Search --> */}
           <SearchUser primaryUserId={primaryUserId} selectUser={selectUser} />
           {/* <!-- Friends --> */}
-          <div className="bg-white flex-1 overflow-auto divide-y ">
+          <div className="bg-gray-100 flex-1 overflow-auto divide-y ">
             {friendUsers.map((user) => (
               <User
                 key={user.uid}
-                secondaryUser={user}
+                user={user}
                 selectUser={selectUser}
                 primaryUserId={primaryUserId}
               />

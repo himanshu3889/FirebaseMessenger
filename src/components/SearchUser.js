@@ -84,7 +84,7 @@ export default function SearchUser({ primaryUserId, selectUser }) {
       <div className="flex">
         <input
           type="text"
-          className="relative w-full flex-1 bg-white border-2 border-gray-400 rounded-md shadow-sm pl-3 pr-3 py-2 text-left focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className="relative w-full flex-1 mx-1 bg-white border-2 border-gray-400 rounded-md shadow-sm pl-3 pr-3 py-2 text-left focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           autoComplete="off"
           placeholder="Search User"
           value={searchText}
@@ -107,7 +107,7 @@ export default function SearchUser({ primaryUserId, selectUser }) {
         <ul className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-52 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
           {users.map((user) => (
             <li
-              className="text-gray-900 cursor-pointer relative py-1 pl-3 pr-9 border border-black bg-indigo-100 hover:bg-indigo-300 active:bg-indigo-400"
+              className="text-gray-900 cursor-pointer relative py-1 px-3 mx-2 border rounded border-black bg-indigo-100 hover:bg-indigo-300 active:bg-indigo-400"
               onClick={() => handleClick(user)}
               key={user.uid}
             >
@@ -117,7 +117,7 @@ export default function SearchUser({ primaryUserId, selectUser }) {
                   src={user?.avatar || defaultAvatar}
                   alt="avatar"
                 />
-                <span className=" ml-3 block truncate">{user.name}</span>
+                <span className=" ml-3 block ">{user.name}</span>
                 <span className="text-xs ml-3 block truncate">
                   {user.email}
                 </span>

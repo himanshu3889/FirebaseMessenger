@@ -10,7 +10,6 @@ export default function Messages({ message, primaryUserId }) {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [message]);
 
-
   return (
     <div className="py-2 px-3">
       <div
@@ -20,15 +19,17 @@ export default function Messages({ message, primaryUserId }) {
         ref={scrollRef}
       >
         <div
-          className={`rounded py-2 px-3 ${
+          className={`rounded-2xl py-2 px-3 max-w-md  ${
             message?.from === primaryUserId
-              ? "bg-gray-100 hover:bg-gray-200"
-              : "bg-green-200 hover:bg-green-300"
+              ? "rounded-bl-none bg-gray-100 hover:bg-gray-200"
+              : "rounded-br-none bg-green-200 hover:bg-green-300"
           }`}
         >
-          {/* <p className="text-sm text-teal">User Name</p> */}
-          <p className="mb-0">{Decrypt(message?.messageText)}</p>
-          <p className="text-right font-semibold text-xs text-gray-500">
+          <p className="mb-0 break-words rounded-lg">
+            {Decrypt(message?.messageText)}
+          </p>
+
+          <p className="text-right font-semibold text-xs text-gray-400">
             <Moment fromNow ago>
               {message?.createdAt?.toDate()}
             </Moment>
