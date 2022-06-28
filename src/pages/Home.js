@@ -11,6 +11,7 @@ import {
   doc,
   getDoc,
   updateDoc,
+  limit,
 } from "firebase/firestore";
 import { auth, firebaseDb } from "../configs/firebase";
 import SearchUser from "../components/SearchUser";
@@ -70,7 +71,7 @@ export default function Home() {
         ? `${primaryUserId + secondaryUserId}`
         : `${secondaryUserId + primaryUserId}`;
     const msgsRef = collection(firebaseDb, "messages", id, "chat");
-    const messagesQuery = query(msgsRef, orderBy("createdAt", "asc"));
+    const messagesQuery = query(msgsRef, orderBy("createdAt", "asc"), limit(100));
     onSnapshot(messagesQuery, (querySnapshot) => {
       let messages = [];
       querySnapshot.forEach((doc) => {
