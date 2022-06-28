@@ -29,9 +29,7 @@ export default function User({ primaryUserId, user, selectUser }) {
         <img
           src={user?.avatar || defaultAvatar}
           alt="avatar"
-          width="40"
-          height="40"
-          className="rounded-full hidden md:flex md:visible"
+          className="w-12 h-12 border-2 rounded-full shrink-0 hidden md:flex md:visible"
         />
         <div className="flex flex-col ml-2">
           <span className="font-medium text-black">{user?.name}</span>
